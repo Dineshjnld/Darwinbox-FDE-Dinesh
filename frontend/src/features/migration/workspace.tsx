@@ -1539,9 +1539,20 @@ function AuditDrawer({
 }
 
 export function MigrationDetailPage({ migrationId }: { migrationId: string }) {
-  const { select, selectedId, bundle, loading, error, liveEvents, connected, upload, start } =
-    useMigrations();
+  const {
+    select,
+    selectedId,
+    bundle,
+    loading,
+    error,
+    liveEvents,
+    connected,
+    upload,
+    start,
+    resolve,
+  } = useMigrations();
   const [tab, setTab] = useState("overview");
+  const [selectedEscalation, setSelectedEscalation] = useState<Escalation | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   useEffect(() => {
@@ -1704,9 +1715,20 @@ export function MigrationDetailPage({ migrationId }: { migrationId: string }) {
           items={bundle.escalations.filter((e) => e.type.includes("validation"))}
         />
       )}
-      {tab === "escalations" && <InlineEscalations items={bundle.escalations} />}
+      {tab === "escalations" && (
+        <InlineEscalations items={bundle.escalations} onSelect={setSelectedEscalation} />
+      )}
       {tab === "execution" && <InlineExecutions items={bundle.executions} />}
       {tab === "audit" && <InlineAudit items={bundle.audit} />}
+      <EscalationDrawer
+        item={selectedEscalation}
+        open={Boolean(selectedEscalation)}
+        onOpenChange={(open) => !open && setSelectedEscalation(null)}
+        onResolve={async (item, payload) => {
+          await resolve(item, payload);
+          setSelectedEscalation(null);
+        }}
+      />
     </>
   );
 }
@@ -1928,7 +1950,13 @@ function EvidenceTab({
     </section>
   );
 }
-function InlineEscalations({ items }: { items: Escalation[] }) {
+function InlineEscalations({
+  items,
+  onSelect,
+}: {
+  items: Escalation[];
+  onSelect?: (item: Escalation) => void;
+}) {
   return items.length ? (
     <div className="table-shell">
       <table>
@@ -1940,11 +1968,23 @@ function InlineEscalations({ items }: { items: Escalation[] }) {
             <th>Confidence</th>
             <th>Risk</th>
             <th>Status</th>
+            {onSelect && <th />}
           </tr>
         </thead>
         <tbody>
           {items.map((e) => (
-            <tr key={e._id}>
+            <tr
+              key={e._id}
+              className={cn(onSelect && "clickable-row")}
+              onClick={() => onSelect?.(e)}
+              tabIndex={onSelect ? 0 : undefined}
+              onKeyDown={(event) => {
+                if (onSelect && (event.key === "Enter" || event.key === " ")) {
+                  event.preventDefault();
+                  onSelect(e);
+                }
+              }}
+            >
               <td>
                 <strong>{e.title}</strong>
                 <small>{e.why}</small>
@@ -1960,6 +2000,21 @@ function InlineEscalations({ items }: { items: Escalation[] }) {
               <td>
                 <StatusBadge value={e.status} />
               </td>
+              {onSelect && (
+                <td>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Review ${e.title}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onSelect(e);
+                    }}
+                  >
+                    <ChevronRight />
+                  </Button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
