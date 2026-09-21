@@ -6,9 +6,9 @@ Migration Copilot is a governed AI-assisted migration workflow for heterogeneous
 
 ## Demo
 
-<video controls="controls" preload="metadata" width="900" src="https://raw.githubusercontent.com/Dineshjnld/Darwinbox-FDE-Dinesh/main/Video_demo-Darwinbox.mp4">
-  Your browser does not support the embedded video. [Watch the demo video](./Video_demo-Darwinbox.mp4).
-</video>
+[▶ Watch the 2:05 migration copilot demo](https://github.com/Dineshjnld/Darwinbox-FDE-Dinesh/raw/refs/heads/main/Video_demo-Darwinbox.mp4)
+
+The link opens the compressed MP4 directly in the browser for streaming.
 
 The prototype is designed around one core principle:
 
