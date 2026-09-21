@@ -97,6 +97,11 @@ export function MigrationProvider({ children }: { children: ReactNode }) {
     source.onmessage = (message) => {
       try {
         const data = JSON.parse(message.data) as Partial<LiveEvent>;
+        if (data.event_type === "escalation.created") {
+          toast.warning("Human review required", {
+            description: data.message || "A migration decision needs consultant approval.",
+          });
+        }
         setLiveEvents((items) =>
           [
             {

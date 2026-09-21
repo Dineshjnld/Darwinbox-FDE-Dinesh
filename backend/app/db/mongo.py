@@ -45,6 +45,14 @@ class MemoryStore:
         self.collections[collection][str(document["_id"])] = merged
         return merged
 
+    async def update_fields(self, collection: str, doc_id: str, fields: dict[str, Any]) -> dict[str, Any] | None:
+        existing = self.collections[collection].get(str(doc_id))
+        if not existing:
+            return None
+        existing.update(fields)
+        existing["updated_at"] = now()
+        return dict(existing)
+
     async def get(self, collection: str, doc_id: str) -> dict[str, Any] | None:
         return self.collections[collection].get(str(doc_id))
 
@@ -93,6 +101,13 @@ class MongoStore:
         document["updated_at"] = now()
         await self.db[collection].replace_one({"_id": document["_id"]}, document, upsert=True)
         return document
+
+    async def update_fields(self, collection: str, doc_id: str, fields: dict[str, Any]) -> dict[str, Any] | None:
+        update = {**fields, "updated_at": now()}
+        result = await self.db[collection].update_one({"_id": doc_id}, {"$set": update})
+        if not result.matched_count:
+            return None
+        return await self.get(collection, doc_id)
 
     async def get(self, collection: str, doc_id: str) -> dict[str, Any] | None:
         return await self.db[collection].find_one({"_id": doc_id})

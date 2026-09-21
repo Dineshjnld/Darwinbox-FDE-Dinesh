@@ -1248,6 +1248,91 @@ td small {
   border-bottom-color: var(--primary);
   font-weight: 700;
 }
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 15px;
+  height: 15px;
+  margin-left: 5px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+.escalation-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in oklab, var(--destructive) 35%, var(--border));
+  border-left: 3px solid var(--destructive);
+  border-radius: 5px;
+  background: color-mix(in oklab, var(--destructive) 7%, var(--card));
+  color: var(--foreground);
+}
+.escalation-notice > svg {
+  flex: 0 0 auto;
+  width: 17px;
+  color: var(--destructive);
+}
+.escalation-notice > div {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+}
+.escalation-notice strong {
+  font-size: 11px;
+}
+.escalation-notice span {
+  color: var(--muted-foreground);
+  font-size: 10px;
+}
+.escalation-notice button {
+  flex: 0 0 auto;
+}
+.escalation-notice button svg {
+  width: 13px;
+}
+.notification-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--muted-foreground);
+  border-radius: 5px;
+}
+.notification-link:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+.notification-link > svg {
+  width: 16px;
+}
+.notification-count {
+  position: absolute;
+  top: 1px;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border: 2px solid var(--background);
+  border-radius: 999px;
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+}
 .btn-cta {
   background: var(--primary);
   color: var(--primary-foreground);

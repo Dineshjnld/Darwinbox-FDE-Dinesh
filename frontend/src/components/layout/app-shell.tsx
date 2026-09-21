@@ -60,6 +60,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     document.documentElement.classList.toggle("dark", next === "dark");
   };
   const tenant = bundle?.migration.tenant_id || migrations[0]?.tenant_id || "No workspace data";
+  const openEscalations = migrations.reduce(
+    (total, migration) => total + migration.review_count,
+    0,
+  );
   const title = path.startsWith("/migrations/")
     ? bundle?.migration.name || "Migration workspace"
     : [...navigation, ...configuration].find((item) => item.to === path)?.label || "Overview";
@@ -162,9 +166,21 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               {theme === "light" ? <Moon /> : <Sun />}
             </Button>
-            <Button variant="ghost" size="icon" aria-label="Notifications">
+            <Link
+              to="/escalations"
+              className="notification-link"
+              aria-label={
+                openEscalations > 0 ? `${openEscalations} open escalations` : "Notifications"
+              }
+              title={openEscalations > 0 ? `${openEscalations} open escalations` : "Notifications"}
+            >
               <Bell />
-            </Button>
+              {openEscalations > 0 && (
+                <span className="notification-count">
+                  {openEscalations > 99 ? "99+" : openEscalations}
+                </span>
+              )}
+            </Link>
             <Button variant="ghost" size="icon" aria-label="Help">
               <CircleHelp />
             </Button>

@@ -43,16 +43,10 @@ class Runtime:
             self.adapter = MockTargetAdapter(base_url=settings.mock_target_url, failure_rate=settings.mock_failure_rate, fail_once_id=settings.mock_fail_once_id)
 
     async def set_node(self, migration_id: str, node: str) -> None:
-        migration = await self.store.get("migrations", migration_id)
-        if migration:
-            migration.update({"current_node": node, "updated_at": utc_now()})
-            await self.store.save("migrations", migration)
+        await self.store.update_fields("migrations", migration_id, {"current_node": node})
 
     async def set_migration_status(self, migration_id: str, status: str) -> None:
-        migration = await self.store.get("migrations", migration_id)
-        if migration:
-            migration.update({"status": status, "updated_at": utc_now()})
-            await self.store.save("migrations", migration)
+        await self.store.update_fields("migrations", migration_id, {"status": status})
 
 
 class MigrationService:
@@ -175,6 +169,26 @@ class MigrationService:
         records = await self.store.find("normalized_records", {"migration_id": migration_id})
         executions = await self.store.find("execution_batches", {"migration_id": migration_id})
         escalations = await self.store.find("escalations", {"migration_id": migration_id})
-        migration.update({"records_processed": len(records), "review_count": sum(1 for item in escalations if item.get("status") == "open"), "failed_count": sum(1 for item in executions if item.get("status") == "failed"), "success_count": sum(1 for item in executions if item.get("status") == "success"), "auto_approved": sum(1 for item in await self.store.find("mapping_decisions", {"migration_id": migration_id}) if item.get("autonomy") == "AUTO")})
-        await self.store.save("migrations", migration)
-        return migration
+        audit_events = await self.store.find("audit_events", {"migration_id": migration_id}, sort=[("timestamp", -1)])
+        phase_nodes = {"profiler", "mapper", "reconciler", "validator", "decision_gate", "review", "executor", "verifier", "finalize"}
+        latest_node = next((event.get("node") for event in audit_events if event.get("node") in phase_nodes), None)
+        fields = {"records_processed": len(records), "review_count": sum(1 for item in escalations if item.get("status") == "open"), "failed_count": sum(1 for item in executions if item.get("status") == "failed"), "success_count": sum(1 for item in executions if item.get("status") == "success"), "auto_approved": sum(1 for item in await self.store.find("mapping_decisions", {"migration_id": migration_id}) if item.get("autonomy") == "AUTO")}
+        if latest_node:
+            fields["current_node"] = latest_node
+        if audit_events:
+            latest = audit_events[0]
+            if latest.get("event_type") == "migration.completed":
+                fields.update({"status": "completed", "current_node": "finalize"})
+            elif latest.get("event_type") == "migration.paused":
+                fields["status"] = latest.get("status") or "review"
+            elif latest.get("event_type") == "rollback.completed":
+                fields["status"] = "rolled_back"
+            elif latest.get("event_type") == "execution.started":
+                fields["status"] = "executing"
+            elif latest.get("event_type") == "migration.started":
+                fields["status"] = "profiling"
+            elif latest.get("event_type") == "decision.completed" and latest.get("status") == "review":
+                fields["status"] = "review"
+            elif fields["review_count"] > 0 and latest_node in {"decision_gate", "review"}:
+                fields["status"] = "review"
+        return await self.store.update_fields("migrations", migration_id, fields)

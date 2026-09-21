@@ -1548,6 +1548,7 @@ export function MigrationDetailPage({ migrationId }: { migrationId: string }) {
   if (error && !bundle) return <ErrorState message={error} onRetry={() => select(migrationId)} />;
   if (!bundle || bundle.migration._id !== migrationId) return null;
   const m = bundle.migration;
+  const openEscalations = bundle.escalations.filter((item) => item.status === "open");
   const tabs = [
     "overview",
     "files",
@@ -1604,6 +1605,22 @@ export function MigrationDetailPage({ migrationId }: { migrationId: string }) {
           )}
         </div>
       </div>
+      {openEscalations.length > 0 && (
+        <div className="escalation-notice" role="status">
+          <AlertTriangle />
+          <div>
+            <strong>
+              {openEscalations.length} escalation{openEscalations.length === 1 ? "" : "s"} require
+              {openEscalations.length === 1 ? "s" : ""} your review
+            </strong>
+            <span>Resolve these decisions before the migration can continue to execution.</span>
+          </div>
+          <Button variant="outline" onClick={() => setTab("escalations")}>
+            Review escalations
+            <ArrowRight />
+          </Button>
+        </div>
+      )}
       <div className="tab-bar" role="tablist">
         {tabs.map((value) => (
           <button
@@ -1614,6 +1631,11 @@ export function MigrationDetailPage({ migrationId }: { migrationId: string }) {
             onClick={() => setTab(value)}
           >
             {value}
+            {value === "escalations" && openEscalations.length > 0 && (
+              <span className="tab-count" aria-label={`${openEscalations.length} open escalations`}>
+                {openEscalations.length}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -1716,13 +1738,13 @@ function MigrationOverview({
     verifier: 7,
     finalize: 8,
   };
-  const active =
-    m.status === "completed"
-      ? 8
-      : (nodeIndex[m.current_node || ""] ?? (m.status === "draft" ? 0 : 1));
   const activity = liveEvents.length
     ? liveEvents.slice(0, 8)
     : bundle.audit.slice(0, 8).map((a) => ({ ...a, received_at: a.timestamp }));
+  const latestActivityNode = activity.find((event) => event.node && nodeIndex[event.node])?.node;
+  const currentNode = latestActivityNode || m.current_node || "";
+  const active =
+    m.status === "completed" ? 8 : (nodeIndex[currentNode] ?? (m.status === "draft" ? 0 : 1));
   return (
     <>
       <section className="metric-strip">
@@ -1740,7 +1762,7 @@ function MigrationOverview({
           <div className="section-title">
             <div>
               <h3>Processing Pipeline</h3>
-              <p>Current phase: {m.current_node?.replaceAll("_", " ") || m.status}</p>
+              <p>Current phase: {currentNode.replaceAll("_", " ") || m.status}</p>
             </div>
           </div>
           <div className="pipeline">
