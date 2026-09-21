@@ -124,11 +124,46 @@ The workflow test covers escalation creation, approval, resume, execution, failu
 
 The frontend is built as a Node 22 TanStack Start/Nitro server and exposed on port 3000 inside its container. Compose publishes it on port 5173. The backend is health-checked before the frontend starts, and MongoDB Atlas remains an external managed dependency. Use a secret manager for production credentials, configure authenticated tenant access, restrict CORS to the deployed frontend origin, and provide a production Darwinbox adapter before changing `TARGET_PROVIDER` from `mock`.
 
-### Render
+### Single-Service Render Deployment
 
-Deploy the root `Dockerfile` as a Render Web Service for the FastAPI API. Set the service environment variables from `.env.example`, at minimum `MONGODB_URI`, `MONGODB_DATABASE`, `REQUIRE_MONGODB`, the Cerebras/Gemini settings, `TARGET_PROVIDER`, and `CORS_ORIGINS`. Render supplies `PORT`; the image binds to it automatically. Do not set `MOCK_TARGET_URL` to the Compose hostname when deploying outside Compose. Use a separately deployed mock-target service for testing or configure the production Darwinbox adapter.
+Deploy the root `Dockerfile` as one Render Web Service:
 
-Deploy the UI as a second Render Web Service from `frontend/` using `frontend/Dockerfile`. Set `VITE_API_URL` to the public HTTPS URL of the API during the frontend image build, and set `CORS_ORIGINS` on the API to the public frontend URL. The frontend image listens on Render's `PORT` at runtime and serves the TanStack Start application.
+1. Service type: Web Service, runtime: Docker.
+2. Root directory: repository root (`/`).
+3. Dockerfile path: `./Dockerfile`.
+4. Health check path: `/health`.
+5. Do not create separate frontend, backend, or mock-target Render services.
+
+The container runs Nginx, FastAPI, the internal mock target, and the TanStack Start UI. Render's public URL routes to Nginx: `/` and client-side routes go to the UI, `/api/*` goes to FastAPI, `/docs` and `/openapi.json` go to Swagger/OpenAPI, `/health` is the service health check, and `/mock-api/*` reaches the private mock target. The browser uses `VITE_API_URL=/api`; it never connects directly to MongoDB.
+
+Set these Render environment variables from `.env.example`:
+
+```env
+APP_ENV=production
+MONGODB_URI=<Render secret: MongoDB Atlas connection string>
+MONGODB_DATABASE=migration_copilot
+REQUIRE_MONGODB=true
+CEREBRAS_API_KEY=<Render secret>
+LLM_PROVIDER=cerebras
+LLM_MODEL=qwen-3.8-27b
+CEREBRAS_BASE_URL=https://api.cerebras.ai/v1
+LLM_FALLBACK_PROVIDER=gemini
+GEMINI_API_KEY=<Render secret>
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta
+TARGET_PROVIDER=mock
+MOCK_TARGET_URL=http://127.0.0.1:8081
+MOCK_FAILURE_RATE=0.0
+MOCK_FAIL_ONCE_ID=EMP005
+DARWINBOX_MCP_URL=
+DARWINBOX_API_URL=
+DARWINBOX_API_KEY=
+DEFAULT_TENANT_ID=demo-tenant
+LOG_LEVEL=INFO
+CORS_ORIGINS=https://<your-service>.onrender.com
+```
+
+Render supplies `PORT`; Nginx binds to it at startup. MongoDB Atlas remains the managed persistence layer. Keep `TARGET_PROVIDER=mock` until a real Darwinbox tenant and adapter credentials are configured. The local `docker-compose.yml` remains a three-container development stack.
 
 ## Security boundaries
 
