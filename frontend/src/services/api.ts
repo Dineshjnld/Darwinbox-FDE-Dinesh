@@ -47,6 +47,7 @@ export const api = {
     request<{ status: string }>(`/api/migrations/${id}/resume`, { method: "POST" }),
   mappings: (id: string) => request<Mapping[]>(`/api/migrations/${id}/mappings`),
   escalations: (id: string) => request<Escalation[]>(`/api/migrations/${id}/escalations`),
+  allEscalations: () => request<Escalation[]>("/api/escalations"),
   resolve: (
     id: string,
     body: {

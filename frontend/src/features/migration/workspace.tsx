@@ -859,11 +859,12 @@ function MappingDrawer({
 }
 
 export function EscalationsPage() {
-  const { migrations, selectedId, select, bundle, loading, resolve } = useMigrations();
+  const { migrations, selectedId, select, escalations, loading, resolve } = useMigrations();
   const [statusFilter, setStatusFilter] = useState("open");
   const [riskFilter, setRiskFilter] = useState("all");
   const [selected, setSelected] = useState<Escalation | null>(null);
-  const rows = (bundle?.escalations || []).filter(
+  const migrationsById = new Map(migrations.map((migration) => [migration._id, migration]));
+  const rows = escalations.filter(
     (item) =>
       (statusFilter === "all" || item.status === statusFilter) &&
       (riskFilter === "all" || riskFor(item).toLowerCase() === riskFilter),
@@ -901,12 +902,12 @@ export function EscalationsPage() {
           </SelectContent>
         </Select>
       </div>
-      {loading && !bundle ? (
+      {loading && !migrations.length ? (
         <LoadingState />
-      ) : !bundle ? (
+      ) : !migrations.length ? (
         <EmptyState
-          title="Select a migration"
-          description="Choose a migration to review its escalations."
+          title="No migrations"
+          description="Create a migration before reviewing escalations."
         />
       ) : !rows.length ? (
         <EmptyState
@@ -940,7 +941,7 @@ export function EscalationsPage() {
                     <strong>{item.title}</strong>
                     <small>{item.type.replaceAll("_", " ")}</small>
                   </td>
-                  <td>{bundle.migration.name}</td>
+                  <td>{migrationsById.get(item.migration_id || "")?.name || "Migration"}</td>
                   <td className="mono-cell">{item.record_id?.split(":").pop() || "—"}</td>
                   <td>{item.target_field || "—"}</td>
                   <td>
@@ -952,7 +953,9 @@ export function EscalationsPage() {
                   <td>
                     <StatusBadge value={item.status} />
                   </td>
-                  <td>{formatDate(bundle.migration.updated_at)}</td>
+                  <td>
+                    {formatDate(migrationsById.get(item.migration_id || "")?.updated_at || "")}
+                  </td>
                   <td>
                     <Button variant="ghost" size="icon" aria-label="Review decision">
                       <ChevronRight />

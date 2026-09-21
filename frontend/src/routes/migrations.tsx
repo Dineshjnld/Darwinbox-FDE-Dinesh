@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { MigrationsPage } from "@/features/migration/workspace";
 export const Route = createFileRoute("/migrations")({
   head: () => ({
@@ -17,5 +17,11 @@ export const Route = createFileRoute("/migrations")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: MigrationsPage,
+  component: MigrationsRouteComponent,
 });
+
+function MigrationsRouteComponent() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const isListRoute = pathname === "/migrations" || pathname === "/migrations/";
+  return isListRoute ? <MigrationsPage /> : <Outlet />;
+}

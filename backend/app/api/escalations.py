@@ -23,6 +23,17 @@ async def list_escalations(migration_id: str, request: Request) -> list[dict]:
     return jsonable_encoder(await store(request).find("escalations", {"migration_id": migration_id}, sort=[("status", 1), ("created_at", -1)]))
 
 
+@router.get("/escalations")
+async def list_all_escalations(request: Request) -> list[dict]:
+    return jsonable_encoder(
+        await store(request).find(
+            "escalations",
+            {"tenant_id": request.app.state.settings.default_tenant_id},
+            sort=[("status", 1), ("created_at", -1)],
+        )
+    )
+
+
 @router.post("/escalations/{escalation_id}/resolve")
 async def resolve_escalation(escalation_id: str, payload: ResolveRequest, request: Request) -> dict:
     try:
@@ -30,4 +41,3 @@ async def resolve_escalation(escalation_id: str, payload: ResolveRequest, reques
     except KeyError as exc:
         raise HTTPException(404, str(exc)) from exc
     return jsonable_encoder(result)
-

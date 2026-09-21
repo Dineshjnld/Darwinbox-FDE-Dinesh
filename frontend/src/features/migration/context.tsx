@@ -24,6 +24,7 @@ interface MigrationContextValue {
   error: string;
   selectedId: string | null;
   bundle: MigrationBundle | null;
+  escalations: Escalation[];
   liveEvents: LiveEvent[];
   connected: boolean;
   refresh: () => Promise<void>;
@@ -51,6 +52,7 @@ async function loadBundle(id: string): Promise<MigrationBundle> {
 export function MigrationProvider({ children }: { children: ReactNode }) {
   const [migrations, setMigrations] = useState<Migration[]>([]);
   const [bundle, setBundle] = useState<MigrationBundle | null>(null);
+  const [escalations, setEscalations] = useState<Escalation[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -73,8 +75,9 @@ export function MigrationProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const rows = await api.listMigrations();
+      const [rows, queue] = await Promise.all([api.listMigrations(), api.allEscalations()]);
       setMigrations(rows);
+      setEscalations(queue);
       setError("");
       const id = selectedRef.current;
       if (id) setBundle(await loadBundle(id));
@@ -113,6 +116,9 @@ export function MigrationProvider({ children }: { children: ReactNode }) {
           ].slice(0, 30),
         );
         void select(selectedId);
+        if (data.event_type === "escalation.created" || data.event_type === "escalation.resolved") {
+          void refresh();
+        }
       } catch {
         /* keep stream available */
       }
@@ -122,7 +128,7 @@ export function MigrationProvider({ children }: { children: ReactNode }) {
       source.close();
       setConnected(false);
     };
-  }, [selectedId, select]);
+  }, [selectedId, refresh, select]);
   useEffect(() => {
     if (!selectedId || !bundle || ["completed", "rolled_back"].includes(bundle.migration.status))
       return;
@@ -158,12 +164,12 @@ export function MigrationProvider({ children }: { children: ReactNode }) {
   const resolve = useCallback(
     async (item: Escalation, payload: Resolution) => {
       await api.resolve(item._id, payload);
-      if (selectedId) await select(selectedId);
+      await refresh();
       toast.success("Decision recorded", {
         description: "The workflow resumes automatically when all open reviews are resolved.",
       });
     },
-    [selectedId, select],
+    [refresh],
   );
   const retry = useCallback(
     async (id: string) => {
@@ -191,6 +197,7 @@ export function MigrationProvider({ children }: { children: ReactNode }) {
       error,
       selectedId,
       bundle,
+      escalations,
       liveEvents,
       connected,
       refresh,
@@ -208,6 +215,7 @@ export function MigrationProvider({ children }: { children: ReactNode }) {
       error,
       selectedId,
       bundle,
+      escalations,
       liveEvents,
       connected,
       refresh,
