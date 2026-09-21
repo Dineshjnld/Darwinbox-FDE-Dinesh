@@ -4,6 +4,12 @@
 
 Migration Copilot is a governed AI-assisted migration workflow for heterogeneous client HCM data. It accepts multiple CSV/XLSX exports for the same entity, profiles inconsistent source schemas and values, proposes evidence-backed source-to-target mappings, reconciles records, validates them against a target contract, pauses when ambiguity requires human judgment, executes controlled target operations, verifies results, and records an audit trail.
 
+## Demo
+
+<video controls="controls" preload="metadata" width="900" src="https://raw.githubusercontent.com/Dineshjnld/Darwinbox-FDE-Dinesh/main/Video_demo-Darwinbox.mp4">
+  Your browser does not support the embedded video. [Watch the demo video](./Video_demo-Darwinbox.mp4).
+</video>
+
 The prototype is designed around one core principle:
 
 > **AI proposes → Control Plane evaluates → Human resolves ambiguity → System executes → Audit records the outcome.**
