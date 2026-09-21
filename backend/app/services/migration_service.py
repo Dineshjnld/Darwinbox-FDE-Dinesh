@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
+
 from app.agents.graph import MigrationGraph
 from app.agents.llm import LLMClient
 from app.config import Settings
@@ -22,7 +23,7 @@ from app.services.file_service import FileService
 
 
 def utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Runtime:

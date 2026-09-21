@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from typing import Any
 
 
@@ -38,13 +38,13 @@ def parse_date(value: Any) -> tuple[str | None, bool]:
         if first <= 12 and second <= 12 and first != second:
             return None, True
         try:
-            return datetime(year, second, first, tzinfo=timezone.utc).strftime("%Y-%m-%d"), False
+            return datetime(year, second, first, tzinfo=UTC).strftime("%Y-%m-%d"), False
         except ValueError:
             return None, False
     formats = ["%Y-%m-%d", "%d-%b-%Y", "%b %d %Y", "%d/%m/%Y"]
     for fmt in formats:
         try:
-            return datetime.strptime(text, fmt).replace(tzinfo=timezone.utc).strftime("%Y-%m-%d"), False
+            return datetime.strptime(text, fmt).replace(tzinfo=UTC).strftime("%Y-%m-%d"), False
         except ValueError:
             continue
     try:

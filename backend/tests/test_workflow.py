@@ -1,5 +1,6 @@
 
 import pytest
+
 from app.config import Settings
 from app.db.mongo import MemoryStore
 from app.services.event_service import EventBus
