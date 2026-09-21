@@ -1,6 +1,6 @@
 # Architecture
 
-The React client calls a small FastAPI control plane. The control plane owns migration lifecycle, file storage, event fan-out, and the repository boundary. Production Compose connects to MongoDB Atlas when configured; Docker Compose also starts a local MongoDB container as fallback. The migration graph is a sequence of narrow nodes with a conditional decision gate:
+The React client calls a small FastAPI control plane. The control plane owns migration lifecycle, file storage, event fan-out, and the repository boundary. Compose connects to the configured MongoDB Atlas cluster; MongoDB is an external managed dependency and is not run inside the application containers. The migration graph is a sequence of narrow nodes with a conditional decision gate:
 
 ```text
 profile → map → reconcile → validate → decision
