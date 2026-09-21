@@ -1,0 +1,32 @@
+entity: employee
+fields:
+  employee_id:
+    type: string
+    required: true
+    unique: true
+  first_name:
+    type: string
+    required: true
+  last_name:
+    type: string
+    required: true
+  email:
+    type: email
+    required: true
+  date_of_birth:
+    type: date
+    required: false
+  date_of_joining:
+    type: date
+    required: true
+  department:
+    type: string
+    required: false
+  employment_status:
+    type: enum
+    values:
+      - ACTIVE
+      - INACTIVE
+      - TERMINATED
+    required: false
+

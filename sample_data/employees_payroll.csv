@@ -1,0 +1,7 @@
+employee_id,employee_name,email_address,date_joined,business_unit
+EMP001,John Shah,john.shah@example.com,2024-01-20,Finance
+EMP002,Asha Menon,asha.menon@example.com,01/02/2024,Operations
+EMP003,Ravi Kumar,ravi.kumar@example.com,2024-02-01,Engineering
+EMP005,Omar Khan,omar.khan@example.com,2024-01-20,Operations
+EMP006,Meera Joshi,meera.joshi@example.com,2024-03-01,Finance
+

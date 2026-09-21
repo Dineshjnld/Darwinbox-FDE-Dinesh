@@ -1,0 +1,7 @@
+employee_number,given_name,last_name,work_email,joining_date,department,employment_status
+EMP001,John,Shah,john.shah@example.com,20-Jan-2024,Finance,ACTIVE
+EMP002,Asha,Menon,asha.menon@example.com,2024-02-01,Operations,ACTIVE
+EMP003,Ravi,Kumar,ravi.kumar@example.com,2024-02-01,Engineering,ACTIVE
+EMP004,Neha,Patel,neha.patel@example.com,20/01/2024,People,INACTIVE
+EMP005,Omar,Khan,omar.khan@example.com,2024-01-20,Finance,ACTIVE
+

@@ -1,0 +1,7 @@
+emp_id,fname,surname,email,doj,dept,status
+EMP001, John ,Shah, JOHN.SHAH@EXAMPLE.COM ,20/01/2024,Finance,active
+EMP002,Asha,Menon,asha.menon@example.com,2024-02-01,Operations,active
+EMP003,Ravi,Kumar,ravi.kumar@example.com,01/02/2024,Engineering,active
+EMP004,Neha,Patel,neha.patel@example.com,20-Jan-2024,People,inactive
+EMP005, Omar ,Khan,omar.khan@example.com,Jan 20 2024,Finance,active
+

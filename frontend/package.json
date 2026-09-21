@@ -1,0 +1,27 @@
+{
+  "name": "darwinbox-migration-copilot",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "lucide-react": "^1.47.0",
+    "react": "latest",
+    "react-dom": "latest",
+    "recharts": "^3.10.1",
+    "typescript": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
